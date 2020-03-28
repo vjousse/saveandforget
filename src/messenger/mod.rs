@@ -1,7 +1,7 @@
 // https://developers.facebook.com/docs/messenger-platform/reference/webhook-events/messages
 // https://developers.facebook.com/docs/messenger-platform/reference/webhook-events
 
-type Url = String;
+use crate::core::Url;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Event {
