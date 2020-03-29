@@ -1,6 +1,8 @@
-use uuid::Uuid;
-use std::path::Path;
 use reqwest::Client;
+use std::path::Path;
+use tokio::prelude::*;
+use tokio::fs::File;
+use uuid::Uuid;
 
 pub type Url = String;
 
@@ -11,11 +13,11 @@ pub async fn download_files(urls: &Vec<Url>, destination_dir: &Path) -> Result<i
     let client = Client::new();
     for url in urls.iter() {
         match client.get(url).send().await {
-            Ok(resp) => {
-                println!("{:#?}", resp);
+            Ok(mut resp) => {
 
                 let content_type:Option<&str> = extract_header(resp.headers().get("content-type"));
-                
+                dbg!(content_type);
+
                 let my_uuid = Uuid::new_v4();
                 let destination_file = destination_dir.join(my_uuid.to_string() +
                 match content_type {
@@ -26,7 +28,17 @@ pub async fn download_files(urls: &Vec<Url>, destination_dir: &Path) -> Result<i
                     None => ""
                 });
 
-                println!("Destination file: {:#?}", destination_file);
+                dbg!(&destination_file);
+
+                match File::create(destination_file).await {
+                    Ok(mut file) => {
+                        while let Some(chunk) = resp.chunk().await? {
+                            file.write_all(&chunk).await?;
+                        }
+                    },
+                    Err(_) => ()
+                }
+
             }
             Err(err) => {
                 println!("Error downloading {:#?}", err);
