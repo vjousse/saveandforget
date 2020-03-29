@@ -124,7 +124,6 @@ pub fn get_full_test_event() -> Event {
 }
 
 pub fn parse_document(event: Event) -> Result<Vec<String>, String> {
-    println!("Parsing document {:#?}", event);
     if event.object != "page" {
         return Err("Bad page type".to_owned());
     }
