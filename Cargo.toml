@@ -7,12 +7,16 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+chrono = { version = "0.4.10", features = ["serde"] }
+deadpool-postgres = "0.5.0"
+derive_more = "0.99.5"
+futures = "0.3"
 serde = "1.0"
 serde_json = "1.0"
 serde_derive = "1.0"
-chrono = { version = "0.4.10", features = ["serde"] }
-diesel = { version = "1.4.3", features = ["postgres", "chrono"] }
 reqwest = { version = "0.10", features = ["blocking", "json"] }
 tokio = { version = "0.2", features = ["full"] }
-futures = "0.3"
+tokio-pg-mapper = "0.1"
+tokio-pg-mapper-derive = "0.1"
+tokio-postgres = "0.5.1"
 uuid = { version = "0.8", features = ["v4"] }
