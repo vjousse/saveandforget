@@ -10,15 +10,10 @@ async fn main() {
     let path = Path::new("/home/vjousse/usr/src/saveandforget/saveandforget/downloads/");
     let result = match saf::messenger::parse_document(test_event) {
         Ok(urls) => {
-            match saf::core::download_files(&urls, path).await {
-                //@TODO: Get the paths of the downloaded files in return to 
-                //insert a document in the database
-                Ok(ok) => Ok(urls.len()),
-                Err(e) => Err(0),
-
-            }
+            let files = saf::core::download_files_join(&urls, path).await;
+            Ok(files.len())
         },
-        Err(_) => Ok(0),
+        Err(_) => Err(0),
     };
 
 
