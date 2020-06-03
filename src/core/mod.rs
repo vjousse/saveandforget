@@ -1,3 +1,4 @@
+use crate::errors::FileDownloadError;
 use futures::future::join_all;
 use reqwest::Client;
 use std::path::Path;
@@ -24,18 +25,12 @@ pub async fn download_file(client: &Client, url: &Url, destination_dir: &Path) -
 
         Ok(mut resp) => {
             dbg!(format!("Downloaded {}", &url));
-            let content_type:Option<&str> = extract_header(resp.headers().get("content-type"));
-            dbg!(content_type);
+            let file_extension = get_file_extension(resp.headers(), Some(url))?;
+
+            dbg!(&file_extension);
 
             let my_uuid = Uuid::new_v4();
-            let destination_file = destination_dir.join(my_uuid.to_string() +
-            match content_type {
-                Some("image/png") => ".png",
-                Some("image/jpeg") => ".jpg",
-                Some("image/gif") => ".gif",
-                Some(_) => "",
-                None => ""
-            });
+            let destination_file = destination_dir.join(format!("{}{}", my_uuid.to_string(), file_extension));
 
             dbg!(&destination_file);
 
@@ -60,4 +55,31 @@ pub async fn download_file(client: &Client, url: &Url, destination_dir: &Path) -
 
 pub fn extract_header(header_value: Option<&reqwest::header::HeaderValue>) -> Option<&str> {
     header_value.and_then(|v| v.to_str().ok())
+}
+
+pub fn get_file_extension(headers: &reqwest::header::HeaderMap, url: Option<&Url>) -> Result<String, Box<dyn std::error::Error>> {
+
+    let header: Option<&str> = extract_header(headers.get("content-type"));
+
+    match header {
+        Some(content_type) => match content_type {
+            "image/png" => Ok(".png".to_owned()),
+            "image/jpeg" => Ok(".jpg".to_owned()),
+            "image/gif" => Ok(".gif".to_owned()),
+            _ => {
+                Err(Box::new(FileDownloadError {
+                    message : format!(
+                      "Not an image extension, got unknown extension {}{}",
+                      content_type, match url {
+                        Some(u) => format!(". Url was: {}", u),
+                        None => "".to_owned()
+                    })
+                }))
+            }
+        }
+        None => Err(
+                Box::new(FileDownloadError {
+                    message : "Content type not found in headers".to_owned()
+            }))
+    }
 }
