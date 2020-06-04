@@ -1,12 +1,21 @@
 extern crate saveandforget as saf;
+extern crate dotenv;
 use std::path::Path;
+use std::env;
 
+
+use dotenv::dotenv;
 // use saf::models::Document;
 
 #[tokio::main]
 async fn main() {
+    dotenv().expect("Failed to read .env file");
     let test_event = saf::messenger::get_full_test_event();
-    let path = Path::new("/home/vjousse/usr/src/saveandforget/saveandforget/downloads/");
+
+    let download_path = env::var("DOWNLOAD_PATH").expect("DOWNLOAD_PATH not found");
+
+    let path = Path::new(&download_path);
+
     let result = match saf::messenger::parse_document(test_event) {
         Ok(urls) => {
 

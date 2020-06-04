@@ -10,6 +10,7 @@ edition = "2018"
 chrono = { version = "0.4.10", features = ["serde"] }
 deadpool-postgres = "0.5.0"
 derive_more = "0.99.5"
+dotenv = "0.15"
 futures = "0.3"
 serde = "1.0"
 serde_json = "1.0"
