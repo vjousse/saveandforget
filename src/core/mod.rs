@@ -12,10 +12,13 @@ pub async fn download_files_join(urls: &Vec<Url>, destination_dir: &Path) -> Vec
 
     let client = Client::new();
 
+    // Transform a collection of Urls into a collection of futures that
+    // will save the files on disk
     let downloading_futures =
         urls.iter()
             .map(|url| download_file(&client, url, destination_dir));
 
+    // Excute all the futures async
     join_all(downloading_futures).await
 }
 
@@ -24,7 +27,8 @@ pub async fn download_file(client: &Client, url: &Url, destination_dir: &Path) -
     match client.get(url).send().await {
 
         Ok(mut resp) => {
-            dbg!(format!("Downloaded {}", &url));
+            dbg!(format!("Trying to download {}", &url));
+
             let file_extension = get_file_extension(resp.headers(), Some(url))?;
 
             dbg!(&file_extension);

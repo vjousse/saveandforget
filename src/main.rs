@@ -16,20 +16,17 @@ async fn main() {
 
     let path = Path::new(&download_path);
 
-    let result = match saf::messenger::parse_document(test_event) {
+    let urls = match saf::messenger::parse_document(test_event) {
         Ok(urls) => {
-
             let files:Vec<Result<String,Box<dyn std::error::Error>>> =
                 saf::core::download_files_join(&urls, path).await;
-
-            dbg!(&files);
-            Ok(files.len())
+            files
         },
-        Err(_) => Err(0),
+        Err(_) => vec![]
     };
 
 
 
 
-    println!("{:#?}", result);
+    dbg!(urls);
 }

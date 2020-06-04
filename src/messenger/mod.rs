@@ -96,7 +96,7 @@ pub fn get_full_test_event() -> Event {
                                     Attachment {
                                         attachment_type: "image".to_owned(),
                                         payload: AttachmentPayload {
-                                            url: "https://scontent.xx.fbcdn.net/v/t1.15752-9/90705472_654093985409346_2632304843477221376_n.png?_nc_cat=111&_nc_sid=b96e70&_nc_ohc=0z8RsaQCHekAX-5td3t&_nc_ad=z-m&_nc_cid=0&_nc_zor=9&_nc_ht=scontent.xx&oh=9489c928d93b0f69adc11251c1970d60&oe=5EA29A7D".to_owned(),
+                                            url: "https://data.jousse.org/autocomplete.png".to_owned(),
                                             title: None,
                                             sticker_id: None,
                                             coordinates_lat: None,
