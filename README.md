@@ -29,7 +29,7 @@
     ```
 
     This step can be repeated and clears the database as it drops and
-    recreates the schema `testing` which is used within the database.
+    recreates the tables.
 
 4. Create `.env` file:
 

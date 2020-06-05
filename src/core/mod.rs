@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 pub type Url = String;
 
-pub async fn download_files_join(urls: &Vec<Url>, destination_dir: &Path) -> Vec<Result<String, Box<dyn std::error::Error>>> {
+pub async fn download_files(urls: &Vec<Url>, destination_dir: &Path) -> Vec<Result<String, Box<dyn std::error::Error>>> {
 
     let client = Client::new();
 
