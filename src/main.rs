@@ -1,11 +1,16 @@
-extern crate saveandforget as saf;
+#[macro_use]
+extern crate diesel;
 extern crate dotenv;
+extern crate saveandforget as saf;
+
+use db_connection::establish_connection;
+use saf::models::document::Document;
+use dotenv::dotenv;
 use std::path::Path;
 use std::env;
 
-
-use dotenv::dotenv;
-use saf::models::Document;
+pub mod db_connection;
+pub mod schema;
 
 #[tokio::main]
 async fn main() {
@@ -13,6 +18,7 @@ async fn main() {
     let test_event = saf::messenger::get_full_test_event();
 
     let download_path = env::var("DOWNLOAD_PATH").expect("DOWNLOAD_PATH not found");
+    let pg_connection = establish_connection();
 
     let path = Path::new(&download_path);
 

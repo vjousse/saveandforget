@@ -1,4 +1,4 @@
-use crate::{errors::SafError, models::Document};
+use crate::{errors::SafError, models::document::Document};
 use deadpool_postgres::Client;
 use tokio_pg_mapper::FromTokioPostgresRow;
 

@@ -16,10 +16,21 @@
     of your choice in the following steps and change the `.env` file
     containing the configuration accordingly.
 
+    Be sure that your database has permission to create the DB. If not, grant it in a database shell (run `psql`):
+
+    ```sql
+    ALTER USER saveandforget CREATEDB;
+    ```
+
 2. Create database
 
     ```shell
     createdb -O saveandforget saveandforget_db
+    ```
+
+To drop an existing database:
+    ```shell
+    dropdb saveandforget_db
     ```
 
 3. Initialize database
@@ -42,3 +53,7 @@
     PG.DBNAME=saveandforget_db
     PG.POOL.MAX_SIZE=16
     ```
+
+## Useful links
+
+- Tutorial with actix: https://dev.to/werner/practical-rust-web-development-api-rest-29g1
