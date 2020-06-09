@@ -3,7 +3,6 @@ extern crate diesel;
 extern crate dotenv;
 extern crate saveandforget as saf;
 
-use db_connection::establish_connection;
 use saf::models::document::Document;
 use dotenv::dotenv;
 use std::path::Path;
@@ -18,7 +17,6 @@ async fn main() {
     let test_event = saf::messenger::get_full_test_event();
 
     let download_path = env::var("DOWNLOAD_PATH").expect("DOWNLOAD_PATH not found");
-    let pg_connection = establish_connection();
 
     let path = Path::new(&download_path);
 
