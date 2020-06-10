@@ -11,3 +11,4 @@ pub mod errors;
 pub mod messenger;
 pub mod models;
 pub mod schema;
+pub mod web_handlers;

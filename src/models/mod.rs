@@ -1,2 +1,2 @@
 pub mod document;
-pub mod hub;
+pub mod web;

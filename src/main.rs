@@ -1,22 +1,18 @@
-#[macro_use]
-extern crate diesel;
 extern crate dotenv;
+#[macro_use]
+extern crate log;
 extern crate saveandforget as saf;
 
+
+use actix_web::{
+    middleware, web, App, HttpResponse, HttpServer
+};
 use db_connection::PgPooledConnection;
 use dotenv::dotenv;
+use saf::{db_connection, schema};
 use saf::models::document::NewDocument;
-use std::path::{Path, PathBuf};
-
-pub mod db_connection;
-pub mod schema;
-
-struct AppState {
-    fb_verify_token: String,
-    download_path: PathBuf,
-    pg_pool: PgPooledConnection
-}
-
+use saf::web_handlers::facebook;
+use std::path::PathBuf;
 
 mod config {
     pub use ::config::ConfigError;
@@ -36,6 +32,7 @@ mod config {
     }
 }
 
+/*
 #[tokio::main]
 async fn main() {
     dotenv().expect("Failed to read .env file");
@@ -74,4 +71,48 @@ async fn main() {
 
 
     dbg!(documents);
+}
+*/
+
+
+async fn index() -> &'static str {
+    "Save and forget"
+}
+
+#[actix_rt::main]
+async fn main() -> std::io::Result<()> {
+    dotenv().ok();
+
+    env_logger::init();
+
+    let server_address = std::env::var("SERVER_ADDRESS").unwrap_or_else(|_| "localhost:8000".to_string());
+
+    debug!("Webserver listening on {}", server_address);
+
+    HttpServer::new(|| {
+
+        let config = crate::config::Config::from_env().expect("Error reading .env file.");
+
+        let pg_connection_pool:PgPooledConnection =
+            db_connection::get_connection_pool(config.database_url)
+                .get()
+                .expect("Impossible to connect to DATABASE");
+
+        App::new()
+            .data(saf::models::web::AppState {
+                fb_verify_token: config.fb_verify_token.clone(),
+                download_path: PathBuf::from(config.download_path),
+                pg_pool: pg_connection_pool
+            })
+            .wrap(middleware::Logger::default())
+            .service(
+                web::scope("/fb")
+                    .route("/webhook", web::get().to(facebook::fb_webhook_hub))
+                    .route("/webhook", web::post().to(facebook::fb_webhook_event))
+            )
+            .service(web::resource("/").to(index))
+    })
+    .bind(server_address)?
+    .run()
+    .await
 }
