@@ -6,24 +6,48 @@ extern crate saveandforget as saf;
 use db_connection::PgPooledConnection;
 use dotenv::dotenv;
 use saf::models::document::NewDocument;
-use std::path::Path;
-use std::env;
+use std::path::{Path, PathBuf};
 
 pub mod db_connection;
 pub mod schema;
+
+struct AppState {
+    fb_verify_token: String,
+    download_path: PathBuf,
+    pg_pool: PgPooledConnection
+}
+
+
+mod config {
+    pub use ::config::ConfigError;
+    use serde::Deserialize;
+    #[derive(Deserialize)]
+    pub struct Config {
+        pub fb_verify_token: String,
+        pub download_path: String,
+        pub database_url: String,
+    }
+    impl Config {
+        pub fn from_env() -> Result<Self, ConfigError> {
+            let mut cfg = ::config::Config::new();
+            cfg.merge(::config::Environment::new())?;
+            cfg.try_into()
+        }
+    }
+}
 
 #[tokio::main]
 async fn main() {
     dotenv().expect("Failed to read .env file");
     let test_event = saf::messenger::get_full_test_event();
+    let config = crate::config::Config::from_env().unwrap();
 
-    let download_path = env::var("DOWNLOAD_PATH").expect("DOWNLOAD_PATH not found");
     let pg_connection_pool:PgPooledConnection =
-        db_connection::get_connection_pool()
+        db_connection::get_connection_pool(config.database_url)
             .get()
             .expect("Impossible to connect to DATABASE");
 
-    let path = Path::new(&download_path);
+    let path = Path::new(&config.download_path);
 
     let urls = match saf::messenger::parse_document(test_event) {
         Ok(urls) => {
