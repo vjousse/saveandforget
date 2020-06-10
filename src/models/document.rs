@@ -13,19 +13,36 @@ pub struct Document {
     pub description: Option<String>,
 }
 
-#[derive(Insertable)]
-#[table_name = "documents"]
-pub struct NewDocument {
-    pub filename: String,
-    pub description: Option<String>,
-}
-
 impl Document {
     pub fn new(filename: String, description: String) -> Document {
         Document {
             id: 1,
             filename: filename,
             description: Some(description),
+        }
+    }
+}
+
+#[derive(Insertable, Deserialize, Debug)]
+#[table_name = "documents"]
+pub struct NewDocument {
+    pub filename: String,
+    pub description: Option<String>,
+}
+
+impl NewDocument {
+    pub fn create(&self, connection: &PgConnection) -> Result<Document, diesel::result::Error> {
+        use diesel::RunQueryDsl;
+
+        diesel::insert_into(documents::table)
+            .values(self)
+            .get_result(connection)
+    }
+
+    pub fn new(filename: String, description: Option<String>) -> NewDocument {
+        NewDocument {
+            filename: filename,
+            description: description,
         }
     }
 }

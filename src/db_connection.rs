@@ -11,7 +11,7 @@ fn init_pool(database_url: &str) -> Result<PgPool, PoolError> {
     Pool::builder().build(manager)
 }
 
-pub fn establish_connection() -> PgPool {
+pub fn get_connection_pool() -> PgPool {
     dotenv().ok(); // This will load our .env file.
 
     // Load the DATABASE_URL env variable into database_url, in case of error
