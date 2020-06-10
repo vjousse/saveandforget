@@ -1,12 +1,8 @@
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
-use serde::{Deserialize, Serialize};
-use tokio_pg_mapper_derive::PostgresMapper;
 
 use crate::schema::documents;
 
-#[derive(Debug, Deserialize, PostgresMapper, Serialize)]
-#[pg_mapper(table = "document")]
-#[derive(Queryable)]
+#[derive(Debug, Deserialize, Queryable, Serialize)]
 pub struct Document {
     pub id: i64,
     pub filename: String,
