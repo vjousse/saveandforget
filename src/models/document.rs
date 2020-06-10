@@ -1,11 +1,11 @@
-use diesel::PgConnection;
+use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 use tokio_pg_mapper_derive::PostgresMapper;
 
 use crate::schema::documents;
 
 #[derive(Debug, Deserialize, PostgresMapper, Serialize)]
-#[pg_mapper(table = "document")] // singular 'user' is a keyword..
+#[pg_mapper(table = "document")]
 #[derive(Queryable)]
 pub struct Document {
     pub id: i64,
@@ -14,16 +14,28 @@ pub struct Document {
 }
 
 impl Document {
-    pub fn new(filename: String, description: String) -> Document {
-        Document {
-            id: 1,
-            filename: filename,
-            description: Some(description),
-        }
+    pub fn find(id: &i64, connection: &PgConnection) -> Result<Document, diesel::result::Error> {
+        documents::table.find(id).first(connection)
+    }
+
+    pub fn destroy(id: &i64, connection: &PgConnection) -> Result<(), diesel::result::Error> {
+        diesel::delete(documents::table.find(id)).execute(connection)?;
+        Ok(())
+    }
+
+    pub fn update(
+        id: &i64,
+        new_document: &NewDocument,
+        connection: &PgConnection,
+    ) -> Result<(), diesel::result::Error> {
+        diesel::update(documents::table.find(id))
+            .set(new_document)
+            .execute(connection)?;
+        Ok(())
     }
 }
 
-#[derive(Insertable, Deserialize, Debug)]
+#[derive(Insertable, Deserialize, Debug, AsChangeset)]
 #[table_name = "documents"]
 pub struct NewDocument {
     pub filename: String,
@@ -32,8 +44,6 @@ pub struct NewDocument {
 
 impl NewDocument {
     pub fn create(&self, connection: &PgConnection) -> Result<Document, diesel::result::Error> {
-        use diesel::RunQueryDsl;
-
         diesel::insert_into(documents::table)
             .values(self)
             .get_result(connection)
@@ -47,23 +57,23 @@ impl NewDocument {
     }
 }
 
-// This will tell the compiler that the struct will be serialized and
-// deserialized, we need to install serde to make it work.
 #[derive(Serialize, Deserialize)]
 pub struct DocumentList(pub Vec<Document>);
 
 impl DocumentList {
-    pub fn list(connection: &PgConnection) -> Self {
+    pub fn list(connection: &PgConnection, limit: Option<i64>) -> Self {
         use crate::schema::documents::dsl::*;
-        use diesel::QueryDsl;
-        use diesel::RunQueryDsl;
 
-        let result = documents
-            .limit(10)
+        let mut query = documents.into_boxed();
+
+        if let Some(nb) = limit {
+            query = query.limit(nb);
+        }
+
+        let result = query
             .load::<Document>(connection)
             .expect("Error loading documents");
 
-        // We return a value by leaving it without a comma
         DocumentList(result)
     }
 }
