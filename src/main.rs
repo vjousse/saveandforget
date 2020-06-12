@@ -5,13 +5,13 @@ extern crate saveandforget as saf;
 
 
 use actix_web::{
-    middleware, web, App, HttpRequest, HttpResponse, HttpServer
+    error, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer
 };
 
-use db::{PgPool, PgPooledConnection};
+use db::PgPool;
 use dotenv::dotenv;
-use saf::{db, schema};
-use saf::models::document::{DocumentList, NewDocument};
+use saf::db;
+use saf::models::document::{DocumentList};
 use saf::web_handlers::facebook;
 use std::path::PathBuf;
 
@@ -83,8 +83,15 @@ async fn index() -> &'static str {
 */
 
 
-async fn index(_req: HttpRequest, pg_pool: web::Data<PgPool>) -> Result<HttpResponse, HttpResponse> {
-    Ok(HttpResponse::Ok().json(DocumentList::list(&pg_pool, None)))
+async fn index(_req: HttpRequest, pg_pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
+    let documents= 
+        DocumentList::list(&pg_pool, None)
+            .map_err(|e| {
+                error!("Database error {}", e.message);
+                error::ErrorInternalServerError("Database error.")
+            })?;
+
+    Ok(HttpResponse::Ok().json(documents))
 }
 
 #[actix_rt::main]
