@@ -5,12 +5,13 @@ extern crate saveandforget as saf;
 
 
 use actix_web::{
-    middleware, web, App, HttpResponse, HttpServer
+    middleware, web, App, HttpRequest, HttpResponse, HttpServer
 };
-use db_connection::PgPooledConnection;
+
+use db::{PgPool, PgPooledConnection};
 use dotenv::dotenv;
-use saf::{db_connection, schema};
-use saf::models::document::NewDocument;
+use saf::{db, schema};
+use saf::models::document::{DocumentList, NewDocument};
 use saf::web_handlers::facebook;
 use std::path::PathBuf;
 
@@ -75,8 +76,15 @@ async fn main() {
 */
 
 
+/*
 async fn index() -> &'static str {
     "Save and forget"
+}
+*/
+
+
+async fn index(_req: HttpRequest, pg_pool: web::Data<PgPool>) -> Result<HttpResponse, HttpResponse> {
+    Ok(HttpResponse::Ok().json(DocumentList::list(&pg_pool, None)))
 }
 
 #[actix_rt::main]
@@ -89,20 +97,18 @@ async fn main() -> std::io::Result<()> {
 
     debug!("Webserver listening on {}", server_address);
 
-    HttpServer::new(|| {
+    let app = move || {
 
         let config = crate::config::Config::from_env().expect("Error reading .env file.");
 
-        let pg_connection_pool:PgPooledConnection =
-            db_connection::get_connection_pool(config.database_url)
-                .get()
-                .expect("Impossible to connect to DATABASE");
-
+        let pg_pool:PgPool =
+            db::init_pool(&config.database_url)
+                .expect("Failed to create pool");
         App::new()
+            .data(pg_pool)
             .data(saf::models::web::AppState {
                 fb_verify_token: config.fb_verify_token.clone(),
-                download_path: PathBuf::from(config.download_path),
-                pg_pool: pg_connection_pool
+                download_path: PathBuf::from(config.download_path)
             })
             .wrap(middleware::Logger::default())
             .service(
@@ -111,8 +117,9 @@ async fn main() -> std::io::Result<()> {
                     .route("/webhook", web::post().to(facebook::fb_webhook_event))
             )
             .service(web::resource("/").to(index))
-    })
-    .bind(server_address)?
-    .run()
-    .await
+    };
+
+
+    debug!("Starting server");
+    HttpServer::new(app).bind(server_address)?.run().await
 }

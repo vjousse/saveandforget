@@ -1,5 +1,7 @@
 use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 
+use crate::db;
+use crate::db::PgPool;
 use crate::schema::documents;
 
 #[derive(Debug, Deserialize, Queryable, Serialize)]
@@ -57,7 +59,7 @@ impl NewDocument {
 pub struct DocumentList(pub Vec<Document>);
 
 impl DocumentList {
-    pub fn list(connection: &PgConnection, limit: Option<i64>) -> Self {
+    pub fn list(pool: &PgPool, limit: Option<i64>) -> Self {
         use crate::schema::documents::dsl::*;
 
         let mut query = documents.into_boxed();
@@ -67,7 +69,7 @@ impl DocumentList {
         }
 
         let result = query
-            .load::<Document>(connection)
+            .load::<Document>(&db::get_conn(pool))
             .expect("Error loading documents");
 
         DocumentList(result)
