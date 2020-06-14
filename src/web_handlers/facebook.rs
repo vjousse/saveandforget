@@ -34,7 +34,7 @@ pub async fn fb_webhook_event(
         match messenger::parse_document(event.0) {
             Ok(urls) => {
 
-                println!("Got urls to download {:#?}", urls);
+                debug!("Got urls to download {:#?}", urls);
                 let files = crate::core::download_files(&urls, (&data).download_path.as_path()).await; 
                 match files.len() {
 

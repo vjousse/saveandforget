@@ -27,16 +27,16 @@ pub async fn download_file(client: &Client, url: &Url, destination_dir: &Path) -
     match client.get(url).send().await {
 
         Ok(mut resp) => {
-            dbg!(format!("Trying to download {}", &url));
+            debug!("Trying to download {}", &url);
 
             let file_extension = get_file_extension(resp.headers(), Some(url))?;
 
-            dbg!(&file_extension);
+            debug!("{:?}", &file_extension);
 
             let my_uuid = Uuid::new_v4();
             let destination_file = destination_dir.join(format!("{}{}", my_uuid.to_string(), file_extension));
 
-            dbg!(&destination_file);
+            debug!("{:?}", &destination_file);
 
             match File::create(&destination_file).await {
                 Ok(mut file) => {
@@ -50,7 +50,7 @@ pub async fn download_file(client: &Client, url: &Url, destination_dir: &Path) -
 
         }
         Err(err) => {
-            println!("Error downloading {:#?}", err);
+            error!("Error downloading {:#?}", err);
             Err(Box::new(err))
         }
     }

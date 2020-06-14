@@ -45,15 +45,29 @@ To drop an existing database:
 4. Create `.env` file:
 
     ```ini
-    SERVER_ADDR=127.0.0.1:8080
-    PG.USER=saveandforget
-    PG.PASSWORD=saveandforget
-    PG.HOST=127.0.0.1
-    PG.PORT=5432
-    PG.DBNAME=saveandforget_db
-    PG.POOL.MAX_SIZE=16
+    FB_VERIFY_TOKEN="dev_token"
+    RUST_LOG="actix_server=info,actix_web=info,saveandforget_web=debug"
+    SERVER_ADDRESS="0.0.0.0:8000"
+    DOWNLOAD_PATH="/home/vjousse/usr/src/saveandforget/saveandforget/downloads"
+    DATABASE_URL="postgres://saveandforget:saveandforget@localhost/saveandforget_db"
     ```
+
+## Reverse SSH tunnel
+
+```sh
+ssh -R 127.0.0.1:8080:localhost:8000 vjousse@marty.jousse.org
+```
+
+## Testing HTTP
+
+
+```sh
+http "https://vincent.jousse.org/sendandforget/webhook?hub.verify_token=dev_token&hub.challenge=CHALLENGE_ACCEPTED&hub.mode=subscribe"
+```
+
 
 ## Useful links
 
 - Tutorial with actix: https://dev.to/werner/practical-rust-web-development-api-rest-29g1
+- https://medium.com/@aergonaut/writing-a-github-webhook-with-rust-part-1-rocket-4426dd06d45d
+- https://developers.facebook.com/docs/messenger-platform/getting-started/quick-start
