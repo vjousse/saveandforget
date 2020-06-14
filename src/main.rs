@@ -76,12 +76,6 @@ async fn main() {
 */
 
 
-/*
-async fn index() -> &'static str {
-    "Save and forget"
-}
-*/
-
 
 async fn index(_req: HttpRequest, pg_pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
     let documents= 
