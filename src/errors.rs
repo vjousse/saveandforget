@@ -16,3 +16,20 @@ pub struct DatabaseError {
 
 impl error::Error for DatabaseError {}
 impl AWError::ResponseError for DatabaseError {}
+
+#[derive(Debug, Display, From)]
+pub struct MessengerError {
+    pub message: String,
+}
+
+impl error::Error for MessengerError {}
+impl AWError::ResponseError for MessengerError {}
+
+#[derive(Debug, Display)]
+pub enum SafError {
+    FileDownloadError { message: String },
+    BadObjectError { object: String },
+}
+
+impl error::Error for SafError {}
+impl AWError::ResponseError for SafError {}

@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 actix-web = "2"
 actix-rt = "1"
+anyhow = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 config = "0.10.1"
 derive_more = "0.99.5"

@@ -2,6 +2,8 @@
 // https://developers.facebook.com/docs/messenger-platform/reference/webhook-events
 
 use crate::core::Url;
+use crate::errors::MessengerError;
+use anyhow::Result;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Event {
@@ -123,16 +125,22 @@ pub fn get_full_test_event() -> Event {
         }
 }
 
-pub fn parse_document(event: Event) -> Result<Vec<String>, String> {
+pub fn parse_document(event: Event) -> Result<Vec<String>> {
     if event.object != "page" {
-        return Err("Bad page type".to_owned());
+        Err(MessengerError {
+            message: "Bad page type".to_owned(),
+        })?
     }
     if event.entry.len() == 0 {
-        return Err("No entry".to_owned());
+        Err(MessengerError {
+            message: "No entry".to_owned(),
+        })?
     }
 
     if event.entry[0].messaging.len() == 0 {
-        return Err("No messaging entry".to_owned());
+        Err(MessengerError {
+            message: "No messaging entry".to_owned(),
+        })?
     }
 
     match &event.entry[0].messaging[0].message.attachments {

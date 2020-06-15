@@ -42,10 +42,13 @@ pub struct NewDocument {
 }
 
 impl NewDocument {
-    pub fn create(&self, connection: &PgConnection) -> Result<Document, diesel::result::Error> {
+    pub fn create(&self, pool: &PgPool) -> Result<Document, DatabaseError> {
         diesel::insert_into(documents::table)
             .values(self)
-            .get_result(connection)
+            .get_result(&db::get_conn(pool)?)
+            .map_err(|e| DatabaseError {
+                message: format!("Create error: {}", e),
+            })
     }
 
     pub fn new(filename: String, description: Option<String>) -> NewDocument {

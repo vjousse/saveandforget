@@ -71,3 +71,4 @@ http "https://vincent.jousse.org/sendandforget/webhook?hub.verify_token=dev_toke
 - Tutorial with actix: https://dev.to/werner/practical-rust-web-development-api-rest-29g1
 - https://medium.com/@aergonaut/writing-a-github-webhook-with-rust-part-1-rocket-4426dd06d45d
 - https://developers.facebook.com/docs/messenger-platform/getting-started/quick-start
+- Error handling: https://nick.groenen.me/posts/rust-error-handling/

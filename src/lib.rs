@@ -4,6 +4,8 @@ extern crate diesel;
 extern crate serde_derive;
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate anyhow;
 
 extern crate reqwest;
 
