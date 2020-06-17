@@ -29,6 +29,7 @@ impl AWError::ResponseError for MessengerError {}
 pub enum SafError {
     FileDownloadError { message: String },
     BadObjectError { object: String },
+    EventParsingError { message: String },
 }
 
 impl error::Error for SafError {}
