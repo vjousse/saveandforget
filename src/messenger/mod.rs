@@ -156,17 +156,25 @@ mod tests {
     #[test]
     fn test_bad_event() {
         let full_event = get_bad_object_event();
-        assert_eq!(parse_document(full_event), Err("Bad page type".to_owned()));
+        assert_eq!(
+            parse_document(full_event)
+                .unwrap_err()
+                .downcast_ref::<MessengerError>()
+                .unwrap(),
+            &MessengerError {
+                message: "Bad page type".to_owned(),
+            }
+        );
     }
 
     #[test]
     fn test_full_event_is_ok() {
         let full_event = get_full_test_event();
-        assert_eq!(parse_document(full_event),
-        Ok(vec![
-                "https://scontent.xx.fbcdn.net/v/t1.15752-9/90705472_654093985409346_2632304843477221376_n.png?_nc_cat=111&_nc_sid=b96e70&_nc_ohc=0z8RsaQCHekAX-5td3t&_nc_ad=z-m&_nc_cid=0&_nc_zor=9&_nc_ht=scontent.xx&oh=9489c928d93b0f69adc11251c1970d60&oe=5EA29A7D".to_owned(),
+        assert_eq!(parse_document(full_event).unwrap(),
+        vec![
+                "https://data.jousse.org/autocomplete.png".to_owned(),
                 "https://scontent.xx.fbcdn.net/v/t1.15752-9/90985058_246558926513316_1639749626632339456_n.png?_nc_cat=111&_nc_sid=b96e70&_nc_ohc=eLeUQYlrvRMAX9a-Ann&_nc_ad=z-m&_nc_cid=0&_nc_zor=9&_nc_ht=scontent.xx&oh=06f1a949a0f28c1db01bb0edbc647c9d&oe=5EA2376B".to_owned()
-        ]))
+        ])
     }
 
     fn get_bad_object_event() -> Event {

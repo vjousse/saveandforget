@@ -17,7 +17,7 @@ pub struct DatabaseError {
 impl error::Error for DatabaseError {}
 impl AWError::ResponseError for DatabaseError {}
 
-#[derive(Debug, Display, From)]
+#[derive(Debug, Display, From, PartialEq)]
 pub struct MessengerError {
     pub message: String,
 }
@@ -25,7 +25,7 @@ pub struct MessengerError {
 impl error::Error for MessengerError {}
 impl AWError::ResponseError for MessengerError {}
 
-#[derive(Debug, Display)]
+#[derive(Debug, Display, PartialEq)]
 pub enum SafError {
     FileDownloadError { message: String },
     BadObjectError { object: String },
