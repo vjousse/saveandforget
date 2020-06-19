@@ -34,7 +34,8 @@ pub async fn download_file(client: &Client, url: &Url, destination_dir: &Path) -
             debug!("{:?}", &file_extension);
 
             let my_uuid = Uuid::new_v4();
-            let destination_file = destination_dir.join(format!("{}{}", my_uuid.to_string(), file_extension));
+            let destination_filename = format!("{}{}", my_uuid.to_string(), file_extension);
+            let destination_file = destination_dir.join(&destination_filename);
 
             debug!("{:?}", &destination_file);
 
@@ -43,7 +44,7 @@ pub async fn download_file(client: &Client, url: &Url, destination_dir: &Path) -
                     while let Some(chunk) = resp.chunk().await? {
                         file.write_all(&chunk).await?;
                     };
-                    Ok(destination_file.to_str().unwrap_or("").to_owned())
+                    Ok(destination_filename)
                 },
                 Err(err) => Err(Box::new(err))
             }
