@@ -4,12 +4,15 @@ use crate::db;
 use crate::db::PgPool;
 use crate::errors::DatabaseError;
 use crate::schema::documents;
+use chrono::Local;
+use chrono::NaiveDateTime;
 
 #[derive(Debug, Deserialize, Queryable, Serialize)]
 pub struct Document {
     pub id: i64,
     pub filename: String,
     pub description: Option<String>,
+    pub created_at: NaiveDateTime,
 }
 
 impl Document {
@@ -39,6 +42,7 @@ impl Document {
 pub struct NewDocument {
     pub filename: String,
     pub description: Option<String>,
+    pub created_at: NaiveDateTime,
 }
 
 impl NewDocument {
@@ -55,6 +59,7 @@ impl NewDocument {
         NewDocument {
             filename: filename,
             description: description,
+            created_at: Local::now().naive_local(),
         }
     }
 }

@@ -3,6 +3,7 @@
 CREATE TABLE documents (
   id  BIGSERIAL PRIMARY KEY,
   filename    VARCHAR(200) NOT NULL,
-  description TEXT
+  description TEXT,
+  created_at TIMESTAMP NOT NULL
 --  user_id     INTEGER UNIQUE NOT NULL REFERENCES users(id)
 );

@@ -10,10 +10,11 @@ edition = "2018"
 actix-web = "2"
 actix-rt = "1"
 anyhow = "1.0"
+bcrypt = "0.8"
 chrono = { version = "0.4", features = ["serde"] }
 config = "0.10.1"
 derive_more = "0.99.5"
-diesel = { version = "1.4.4", features = ["postgres", "r2d2"] }
+diesel = { version = "1.4.4", features = ["chrono", "postgres", "r2d2"] }
 dotenv = "0.15"
 env_logger = "0.7"
 futures = "0.3"
