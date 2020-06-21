@@ -2,7 +2,7 @@ use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 
 use crate::db;
 use crate::db::PgPool;
-use crate::errors::DatabaseError;
+use crate::errors::SafError;
 use crate::schema::documents;
 use chrono::Local;
 use chrono::NaiveDateTime;
@@ -46,13 +46,11 @@ pub struct NewDocument {
 }
 
 impl NewDocument {
-    pub fn create(&self, pool: &PgPool) -> Result<Document, DatabaseError> {
+    pub fn create(&self, pool: &PgPool) -> Result<Document, SafError> {
         diesel::insert_into(documents::table)
             .values(self)
             .get_result(&db::get_conn(pool)?)
-            .map_err(|e| DatabaseError {
-                message: format!("Create error: {}", e),
-            })
+            .map_err(|e| SafError::DBError(e))
     }
 
     pub fn new(filename: String, description: Option<String>) -> NewDocument {
@@ -68,7 +66,7 @@ impl NewDocument {
 pub struct DocumentList(pub Vec<Document>);
 
 impl DocumentList {
-    pub fn list(pool: &PgPool, limit: Option<i64>) -> Result<Self, DatabaseError> {
+    pub fn list(pool: &PgPool, limit: Option<i64>) -> Result<Self, SafError> {
         use crate::schema::documents::dsl::*;
 
         let mut query = documents.into_boxed();

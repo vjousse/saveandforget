@@ -1,10 +1,11 @@
-use crate::errors::FileDownloadError;
 use futures::future::join_all;
 use reqwest::Client;
 use std::path::Path;
 use tokio::prelude::*;
 use tokio::fs::File;
 use uuid::Uuid;
+
+use crate::errors::SafError;
 
 pub type Url = String;
 
@@ -62,7 +63,7 @@ pub fn extract_header(header_value: Option<&reqwest::header::HeaderValue>) -> Op
     header_value.and_then(|v| v.to_str().ok())
 }
 
-pub fn get_file_extension(headers: &reqwest::header::HeaderMap, url: Option<&Url>) -> Result<String, Box<dyn std::error::Error>> {
+pub fn get_file_extension(headers: &reqwest::header::HeaderMap, url: Option<&Url>) -> Result<String, SafError> {
 
     let header: Option<&str> = extract_header(headers.get("content-type"));
 
@@ -72,19 +73,19 @@ pub fn get_file_extension(headers: &reqwest::header::HeaderMap, url: Option<&Url
             "image/jpeg" => Ok(".jpg".to_owned()),
             "image/gif" => Ok(".gif".to_owned()),
             _ => {
-                Err(Box::new(FileDownloadError {
+                Err(SafError::FileDownloadError {
                     message : format!(
                       "Not an image extension, got unknown extension {}{}",
                       content_type, match url {
                         Some(u) => format!(". Url was: {}", u),
                         None => "".to_owned()
                     })
-                }))
+                })
             }
         }
         None => Err(
-                Box::new(FileDownloadError {
+                SafError::FileDownloadError {
                     message : "Content type not found in headers".to_owned()
-            }))
+            })
     }
 }

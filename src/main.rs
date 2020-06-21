@@ -5,14 +5,13 @@ extern crate saveandforget as saf;
 
 
 use actix_web::{
-    error, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer
+    middleware, web, App, HttpServer
 };
 
 use db::PgPool;
 use dotenv::dotenv;
 use saf::db;
-use saf::models::document::{DocumentList};
-use saf::web_handlers::facebook;
+use saf::web_handlers::{documents, facebook};
 use std::path::PathBuf;
 
 mod config {
@@ -33,17 +32,6 @@ mod config {
     }
 }
 
-
-async fn index(_req: HttpRequest, pg_pool: web::Data<PgPool>) -> Result<HttpResponse, Error> {
-    let documents= 
-        DocumentList::list(&pg_pool, None)
-            .map_err(|e| {
-                error!("Database error {}", e.message);
-                error::ErrorInternalServerError("Database error.")
-            })?;
-
-    Ok(HttpResponse::Ok().json(documents))
-}
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -74,7 +62,7 @@ async fn main() -> std::io::Result<()> {
                     .route("/webhook", web::get().to(facebook::fb_webhook_hub))
                     .route("/webhook", web::post().to(facebook::fb_webhook_event))
             )
-            .service(web::resource("/").to(index))
+            .service(web::resource("/").to(documents::index))
     };
 
 

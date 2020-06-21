@@ -1,3 +1,5 @@
+use crate::db;
+use crate::db::PgPool;
 use crate::schema::users;
 use chrono::NaiveDateTime; // This type is used for date field in Diesel.
 
@@ -18,17 +20,13 @@ pub struct NewUser {
     pub created_at: NaiveDateTime,
 }
 
-use crate::errors::MyStoreError;
+use crate::errors::SafError;
 use bcrypt::{hash, DEFAULT_COST};
 use chrono::Local;
 use diesel::PgConnection;
 
-// MyStoreError is a custom error that I will show it next.
 impl User {
-    pub fn create(
-        register_user: RegisterUser,
-        connection: &PgConnection,
-    ) -> Result<User, MyStoreError> {
+    pub fn create(register_user: RegisterUser, pool: &PgPool) -> Result<User, SafError> {
         use diesel::RunQueryDsl;
 
         Ok(diesel::insert_into(users::table)
@@ -37,16 +35,16 @@ impl User {
                 password: Self::hash_password(register_user.password)?,
                 created_at: Local::now().naive_local(),
             })
-            .get_result(connection)?)
+            .get_result(&db::get_conn(pool)?)?)
     }
 
     // This might look kind of weird,
     // but if something fails it would chain
-    // to our MyStoreError Error,
+    // to our SafError Error,
     // otherwise it will gives us the hash,
     // we still need to return a result
     // so we wrap it in an Ok variant from the Result type.
-    pub fn hash_password(plain: String) -> Result<String, MyStoreError> {
+    pub fn hash_password(plain: String) -> Result<String, SafError> {
         Ok(hash(plain, DEFAULT_COST)?)
     }
 }
@@ -59,11 +57,11 @@ pub struct RegisterUser {
 }
 
 impl RegisterUser {
-    pub fn validates(self) -> Result<RegisterUser, MyStoreError> {
+    pub fn validates(self) -> Result<RegisterUser, SafError> {
         if self.password == self.password_confirmation {
             Ok(self)
         } else {
-            Err(MyStoreError::PasswordNotMatch(
+            Err(SafError::PasswordNotMatch(
                 "Password and Password Confirmation does not match".to_string(),
             ))
         }
@@ -81,7 +79,7 @@ impl AuthUser {
     // that the code would look very straightforward, I mean,
     // the other way would imply a lot of pattern matching
     // making it look ugly.
-    pub fn login(&self, connection: &PgConnection) -> Result<User, MyStoreError> {
+    pub fn login(&self, connection: &PgConnection) -> Result<User, SafError> {
         use crate::schema::users::dsl::email;
         use bcrypt::verify;
         use diesel::ExpressionMethods;
@@ -94,16 +92,16 @@ impl AuthUser {
 
         let user = records
             .pop()
-            .ok_or(MyStoreError::DBError(diesel::result::Error::NotFound))?;
+            .ok_or(SafError::DBError(diesel::result::Error::NotFound))?;
 
         let verify_password = verify(&self.password, &user.password).map_err(|_error| {
-            MyStoreError::WrongPassword("Wrong password, check again please".to_string())
+            SafError::WrongPassword("Wrong password, check again please".to_string())
         })?;
 
         if verify_password {
             Ok(user)
         } else {
-            Err(MyStoreError::WrongPassword(
+            Err(SafError::WrongPassword(
                 "Wrong password, check again please".to_string(),
             ))
         }
