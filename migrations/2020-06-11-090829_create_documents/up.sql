@@ -5,5 +5,5 @@ CREATE TABLE documents (
   filename    VARCHAR(200) NOT NULL,
   description TEXT,
   created_at TIMESTAMP NOT NULL,
-  user_id     BIGINT UNIQUE NOT NULL REFERENCES users(id)
+  user_id     BIGINT NOT NULL REFERENCES users(id)
 );

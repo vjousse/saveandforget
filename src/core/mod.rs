@@ -38,13 +38,11 @@ pub async fn download_file(client: &Client, url: &Url, destination_dir: &Path) -
 
             let file_extension = get_file_extension(resp.headers(), Some(url))?;
 
-            debug!("{:?}", &file_extension);
-
             let my_uuid = Uuid::new_v4();
             let destination_filename = format!("{}{}", my_uuid.to_string(), file_extension);
             let destination_file = destination_dir.join(&destination_filename);
 
-            debug!("{:?}", &destination_file);
+            debug!("Saving file to {:?}", &destination_file);
 
             match File::create(&destination_file).await {
                 Ok(mut file) => {
