@@ -4,11 +4,13 @@ table! {
         filename -> Varchar,
         description -> Nullable<Text>,
         created_at -> Timestamp,
+        user_id -> Int8,
     }
 }
 
 table! {
     users (email) {
+        id -> Int8,
         email -> Varchar,
         password -> Varchar,
         created_at -> Timestamp,

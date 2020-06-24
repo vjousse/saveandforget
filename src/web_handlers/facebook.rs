@@ -63,7 +63,11 @@ pub async fn fb_webhook_event(
             // Map over the Vec of destination files
                 |result| result.as_ref().map(
                     // Convert Result<String,_> into Result<Document,_>
-                    |download_path| NewDocument::new(download_path.to_owned(), None)
+                    |download_path| NewDocument::new(
+                        download_path.to_owned(),
+                        None,
+                        // Default user is number 1
+                        1)
                 ).map(|new_doc| new_doc.create(&pg_pool))
             )
             .collect::<Vec<_>>();

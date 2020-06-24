@@ -13,6 +13,7 @@ pub struct Document {
     pub filename: String,
     pub description: Option<String>,
     pub created_at: NaiveDateTime,
+    pub user_id: i64,
 }
 
 impl Document {
@@ -43,6 +44,7 @@ pub struct NewDocument {
     pub filename: String,
     pub description: Option<String>,
     pub created_at: NaiveDateTime,
+    pub user_id: i64,
 }
 
 impl NewDocument {
@@ -53,11 +55,12 @@ impl NewDocument {
             .map_err(|e| SafError::DBError(e))
     }
 
-    pub fn new(filename: String, description: Option<String>) -> NewDocument {
+    pub fn new(filename: String, description: Option<String>, user_id: i64) -> NewDocument {
         NewDocument {
             filename: filename,
             description: description,
             created_at: Local::now().naive_local(),
+            user_id: user_id,
         }
     }
 }

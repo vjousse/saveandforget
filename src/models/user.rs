@@ -6,6 +6,7 @@ use chrono::NaiveDateTime; // This type is used for date field in Diesel.
 #[derive(Debug, Serialize, Deserialize, Queryable, Insertable)]
 #[table_name = "users"]
 pub struct User {
+    pub id: i64,
     pub email: String,
     #[serde(skip)] // we're removing password from being show in the response
     pub password: String,
@@ -23,7 +24,6 @@ pub struct NewUser {
 use crate::errors::SafError;
 use bcrypt::{hash, DEFAULT_COST};
 use chrono::Local;
-use diesel::PgConnection;
 
 impl User {
     pub fn create(register_user: RegisterUser, pool: &PgPool) -> Result<User, SafError> {
@@ -79,7 +79,7 @@ impl AuthUser {
     // that the code would look very straightforward, I mean,
     // the other way would imply a lot of pattern matching
     // making it look ugly.
-    pub fn login(&self, connection: &PgConnection) -> Result<User, SafError> {
+    pub fn login(&self, pool: &PgPool) -> Result<User, SafError> {
         use crate::schema::users::dsl::email;
         use bcrypt::verify;
         use diesel::ExpressionMethods;
@@ -88,7 +88,7 @@ impl AuthUser {
 
         let mut records = users::table
             .filter(email.eq(&self.email))
-            .load::<User>(connection)?;
+            .load::<User>(&db::get_conn(pool)?)?;
 
         let user = records
             .pop()
