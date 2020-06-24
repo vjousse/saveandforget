@@ -1,5 +1,10 @@
+use bcrypt::{hash, DEFAULT_COST};
+use chrono::Local;
+use diesel::{QueryDsl, RunQueryDsl};
+
 use crate::db;
 use crate::db::PgPool;
+use crate::errors::SafError;
 use crate::schema::users;
 use chrono::NaiveDateTime; // This type is used for date field in Diesel.
 
@@ -21,14 +26,8 @@ pub struct NewUser {
     pub created_at: NaiveDateTime,
 }
 
-use crate::errors::SafError;
-use bcrypt::{hash, DEFAULT_COST};
-use chrono::Local;
-
 impl User {
     pub fn create(register_user: RegisterUser, pool: &PgPool) -> Result<User, SafError> {
-        use diesel::RunQueryDsl;
-
         Ok(diesel::insert_into(users::table)
             .values(NewUser {
                 email: register_user.email,
@@ -36,6 +35,10 @@ impl User {
                 created_at: Local::now().naive_local(),
             })
             .get_result(&db::get_conn(pool)?)?)
+    }
+
+    pub fn find(email: String, pool: &PgPool) -> Result<User, SafError> {
+        Ok(users::table.find(email).first(&db::get_conn(pool)?)?)
     }
 
     // This might look kind of weird,
@@ -83,8 +86,6 @@ impl AuthUser {
         use crate::schema::users::dsl::email;
         use bcrypt::verify;
         use diesel::ExpressionMethods;
-        use diesel::QueryDsl;
-        use diesel::RunQueryDsl;
 
         let mut records = users::table
             .filter(email.eq(&self.email))

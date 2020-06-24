@@ -1,6 +1,8 @@
 use futures::future::join_all;
 use reqwest::Client;
 use std::path::Path;
+use std::io;
+use std::fs;
 use tokio::prelude::*;
 use tokio::fs::File;
 use uuid::Uuid;
@@ -8,6 +10,10 @@ use uuid::Uuid;
 use crate::errors::SafError;
 
 pub type Url = String;
+
+pub fn rm_file(filename: &str, destination_dir: &Path) -> io::Result<()> {
+    fs::remove_file(destination_dir.join(&filename))
+}
 
 pub async fn download_files(urls: &Vec<Url>, destination_dir: &Path) -> Vec<Result<String, Box<dyn std::error::Error>>> {
 
