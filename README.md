@@ -1,6 +1,10 @@
 # Save and forget core
 
-## Instructions
+Send images to a Facebook page via messenger and save the images to the server.
+
+This is a POC to play with actix-web and facebook webhooks.
+
+## Setup
 
 1. Create database user
 
@@ -52,7 +56,13 @@ To drop an existing database:
     DATABASE_URL="postgres://saveandforget:saveandforget@localhost/saveandforget_db"
     ```
 
-## Reverse SSH tunnel
+## Run
+
+I'm using [https://github.com/watchexec/watchexec](watchexec) to watch for file changes.
+
+    watchexec --exts rs,toml --restart "cargo run" 
+
+## Reverse SSH tunnel for Facebook hooks
 
 ```sh
 ssh -R 127.0.0.1:8080:localhost:8000 vjousse@marty.jousse.org
